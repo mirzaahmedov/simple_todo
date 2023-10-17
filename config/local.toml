@@ -1,0 +1,2 @@
+binding_address = ':8080'
+database_url = 'postgresql://localhost/simple_todo?user=postgres&sslmode=disable'
