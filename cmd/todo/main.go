@@ -41,6 +41,7 @@ func main() {
 		slog.Error("can not connect to the database", slog.String("database", cfg.DatabaseURL), slog.String("error", err.Error()))
 		os.Exit(1)
 	}
+	defer s.Close()
 
 	r := router.NewHTTPRouter(s, slog.Default())
 

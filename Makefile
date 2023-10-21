@@ -12,6 +12,9 @@ build:
 run: build
 	@exec $(build_dir)/todo
 
+test:
+	@go test ./...
+
 migration_init:
 	@migrate create -dir $(migration_dir) -ext sql -seq init
 

@@ -19,10 +19,10 @@ func (s *PostgresStore) Todo() store.TodoRepository {
 	return s.repository.todo
 }
 
-func (t *TodoRepository) Create(values *model.Todo) (*model.Todo, error) {
+func (r *TodoRepository) Create(values *model.Todo) (*model.Todo, error) {
 	todo := &model.Todo{}
 
-	err := t.store.db.QueryRow(
+	err := r.store.db.QueryRow(
 		`
                   INSERT INTO todos (title, content, completed) 
                   VALUES ($1, $2, $3)
@@ -43,12 +43,12 @@ func (t *TodoRepository) Create(values *model.Todo) (*model.Todo, error) {
 		return nil, err
 	}
 
-	return todo, err
+	return todo, nil
 }
-func (t *TodoRepository) GetAll() ([]model.Todo, error) {
+func (r *TodoRepository) GetAll() ([]model.Todo, error) {
 	todos := []model.Todo{}
 
-	rows, err := t.store.db.Query(
+	rows, err := r.store.db.Query(
 		`
                   SELECT id, title, content, completed, update_date, create_date 
                   FROM todos;
@@ -77,10 +77,10 @@ func (t *TodoRepository) GetAll() ([]model.Todo, error) {
 
 	return todos, nil
 }
-func (t *TodoRepository) GetByID(id string) (*model.Todo, error) {
+func (r *TodoRepository) GetByID(id string) (*model.Todo, error) {
 	todo := &model.Todo{}
 
-	err := t.store.db.QueryRow(
+	err := r.store.db.QueryRow(
 		`
                   SELECT id, title, content, completed, update_date, create_date
                   FROM todos 
@@ -101,10 +101,10 @@ func (t *TodoRepository) GetByID(id string) (*model.Todo, error) {
 
 	return todo, nil
 }
-func (t *TodoRepository) Update(id string, values *model.Todo) (*model.Todo, error) {
+func (r *TodoRepository) Update(id string, values *model.Todo) (*model.Todo, error) {
 	todo := model.Todo{}
 
-	err := t.store.db.QueryRow(
+	err := r.store.db.QueryRow(
 		`
                   UPDATE todos 
                   SET title = $1, content = $2, completed = $3 
@@ -129,8 +129,8 @@ func (t *TodoRepository) Update(id string, values *model.Todo) (*model.Todo, err
 
 	return &todo, nil
 }
-func (t *TodoRepository) Delete(id string) error {
-	_, err := t.store.db.Exec(
+func (r *TodoRepository) Delete(id string) error {
+	_, err := r.store.db.Exec(
 		`DELETE FROM todos WHERE id = $1`,
 		id,
 	)
