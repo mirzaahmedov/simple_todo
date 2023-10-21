@@ -5,12 +5,12 @@ import (
 )
 
 type Todo struct {
-	ID         string    `json:"id"`
-	Title      string    `json:"title"`
-	Content    string    `json:"content"`
-	Completed  bool      `json:"completed"`
-	CreateDate time.Time `json:"create_date"`
-	UpdateDate time.Time `json:"update_date"`
+	ID         string     `json:"id,omitempty"`
+	Title      string     `json:"title,omitempty"`
+	Content    string     `json:"content,omitempty"`
+	Completed  bool       `json:"completed"`
+	UpdateDate *time.Time `json:"update_date,omitempty"`
+	CreateDate time.Time  `json:"create_date,omitempty"`
 }
 
 type TodoCreateRequest struct {

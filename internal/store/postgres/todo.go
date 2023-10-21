@@ -24,12 +24,21 @@ func (t *TodoRepository) Create(values *model.Todo) (*model.Todo, error) {
 
 	err := t.store.db.QueryRow(
 		`
-                  INSERT INTO todos (title, content, completed) VALUES ($1, $2, $3);
+                  INSERT INTO todos (title, content, completed) 
+                  VALUES ($1, $2, $3)
+                  RETURNING id, title, content, completed, update_date, create_date;
                 `,
 		&values.Title,
 		&values.Content,
 		&values.Completed,
-	).Scan(&todo)
+	).Scan(
+		&todo.ID,
+		&todo.Title,
+		&todo.Content,
+		&todo.Completed,
+		&todo.UpdateDate,
+		&todo.CreateDate,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +48,12 @@ func (t *TodoRepository) Create(values *model.Todo) (*model.Todo, error) {
 func (t *TodoRepository) GetAll() ([]model.Todo, error) {
 	todos := []model.Todo{}
 
-	rows, err := t.store.db.Query(`SELECT id, title, content, completed, create_date, update_date FROM todos;`)
+	rows, err := t.store.db.Query(
+		`
+                  SELECT id, title, content, completed, update_date, create_date 
+                  FROM todos;
+                `,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -51,8 +65,8 @@ func (t *TodoRepository) GetAll() ([]model.Todo, error) {
 			&todo.Title,
 			&todo.Content,
 			&todo.Completed,
-			&todo.CreateDate,
 			&todo.UpdateDate,
+			&todo.CreateDate,
 		)
 		if err != nil {
 			return nil, err
@@ -67,15 +81,19 @@ func (t *TodoRepository) GetByID(id string) (*model.Todo, error) {
 	todo := &model.Todo{}
 
 	err := t.store.db.QueryRow(
-		`SELECT id, title, content, completed, create_date, update_date FROM todos WHERE id = $1`,
+		`
+                  SELECT id, title, content, completed, update_date, create_date
+                  FROM todos 
+                  WHERE id = $1;
+                `,
 		id,
 	).Scan(
 		&todo.ID,
 		&todo.Title,
 		&todo.Content,
 		&todo.Completed,
-		&todo.CreateDate,
 		&todo.UpdateDate,
+		&todo.CreateDate,
 	)
 	if err != nil {
 		return nil, err
@@ -89,21 +107,21 @@ func (t *TodoRepository) Update(id string, values *model.Todo) (*model.Todo, err
 	err := t.store.db.QueryRow(
 		`
                   UPDATE todos 
-                  SET title = $2, content = $3, completed = $4 
-                  WHERE id = $1
-                  RETURNING id, title, content, completed, create_date, update_date
+                  SET title = $1, content = $2, completed = $3 
+                  WHERE id = $4 
+                  RETURNING id, title, content, completed, update_date, create_date;
                 `,
-		id,
 		values.Title,
 		values.Content,
 		values.Completed,
+		id,
 	).Scan(
 		&todo.ID,
 		&todo.Title,
 		&todo.Content,
 		&todo.Completed,
-		&todo.CreateDate,
 		&todo.UpdateDate,
+		&todo.CreateDate,
 	)
 	if err != nil {
 		return nil, err

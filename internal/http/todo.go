@@ -1,6 +1,7 @@
 package router
 
 import (
+	"log"
 	"log/slog"
 	"net/http"
 
@@ -19,6 +20,8 @@ func (r *HTTPRouter) handleTodoCreate(c *gin.Context) {
 		})
 		return
 	}
+
+	log.Print("request logger is", r.logger)
 
 	todo, err := r.store.Todo().Create(&model.Todo{
 		Title:     req.Title,
@@ -51,7 +54,7 @@ func (r *HTTPRouter) handleTodoGetAll(c *gin.Context) {
 	})
 }
 func (r *HTTPRouter) handleTodoGetByID(c *gin.Context) {
-	id := c.Query("id")
+	id := c.Param("id")
 
 	todo, err := r.store.Todo().GetByID(id)
 	if err != nil {
@@ -66,7 +69,7 @@ func (r *HTTPRouter) handleTodoGetByID(c *gin.Context) {
 	})
 }
 func (r *HTTPRouter) handleTodoUpdate(c *gin.Context) {
-	id := c.Query("id")
+	id := c.Param("id")
 	req := model.TodoUpdateRequest{}
 
 	err := c.ShouldBindJSON(&req)
@@ -96,7 +99,7 @@ func (r *HTTPRouter) handleTodoUpdate(c *gin.Context) {
 	})
 }
 func (r *HTTPRouter) handleTodoDelete(c *gin.Context) {
-	id := c.Query("id")
+	id := c.Param("id")
 
 	err := r.store.Todo().Delete(id)
 	if err != nil {

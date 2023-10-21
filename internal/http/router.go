@@ -18,6 +18,7 @@ func NewHTTPRouter(store store.Store, logger *slog.Logger) *HTTPRouter {
 	return &HTTPRouter{
 		store:  store,
 		router: gin.Default(),
+		logger: logger,
 	}
 }
 
