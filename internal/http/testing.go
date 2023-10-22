@@ -10,7 +10,7 @@ import (
 	"github.com/mirzaahmedov/simple_todo/internal/store/mock"
 )
 
-func NewTestHTTPStore() *HTTPRouter {
+func NewTestHTTPRouter() *HTTPRouter {
 	slog.SetDefault(
 		slog.New(
 			slog.NewTextHandler(os.Stdin, &slog.HandlerOptions{
@@ -19,10 +19,14 @@ func NewTestHTTPStore() *HTTPRouter {
 		),
 	)
 
-	return NewHTTPRouter(
+	r := NewHTTPRouter(
 		mock.NewStore(),
 		slog.Default(),
 	)
+
+	r.Initialize()
+
+	return r
 }
 
 func NewTestRequest(method string, url string, body any) (*http.Request, error) {

@@ -45,6 +45,8 @@ func main() {
 
 	r := router.NewHTTPRouter(s, slog.Default())
 
+	r.Initialize()
+
 	err = r.Listen(cfg.BindingAddress)
 	if err != nil {
 		slog.Error("error running http server", slog.String("binding_address", cfg.BindingAddress), slog.String("error", err.Error()))

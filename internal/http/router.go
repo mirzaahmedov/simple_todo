@@ -21,15 +21,14 @@ func NewHTTPRouter(store store.Store, logger *slog.Logger) *HTTPRouter {
 		logger: logger,
 	}
 }
-
-func (r *HTTPRouter) Listen(httpAddress string) error {
-
+func (r *HTTPRouter) Initialize() {
 	r.router.POST("/todos", r.handleTodoCreate)
 	r.router.GET("/todos", r.handleTodoGetAll)
 	r.router.GET("/todos/:id", r.handleTodoGetByID)
 	r.router.PUT("/todos/:id", r.handleTodoUpdate)
 	r.router.DELETE("/todos/:id", r.handleTodoDelete)
-
+}
+func (r *HTTPRouter) Listen(httpAddress string) error {
 	return r.router.Run(httpAddress)
 }
 func (r *HTTPRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {

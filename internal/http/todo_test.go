@@ -12,7 +12,7 @@ import (
 )
 
 func TestTodoHandlers(t *testing.T) {
-	router := NewTestHTTPStore()
+	router := NewTestHTTPRouter()
 
 	t.Run("TodoCreateHandler", func(t *testing.T) {
 		payload := model.TodoCreateRequest{
@@ -31,16 +31,19 @@ func TestTodoHandlers(t *testing.T) {
 
 		router.ServeHTTP(w, r)
 
-		body := model.Todo{}
+		body := struct {
+			Data model.Todo
+		}{}
 		bodyBytes, err := io.ReadAll(w.Result().Body)
+		t.Log("body", string(bodyBytes))
 		if err != nil {
 			t.Fatal(err)
 		}
 		json.Unmarshal(bodyBytes, &body)
 
 		assert.Equal(t, http.StatusCreated, w.Result().StatusCode)
-		assert.Equal(t, payload.Title, body.Title)
-		assert.Equal(t, payload.Content, body.Content)
-		assert.Equal(t, payload.Completed, body.Completed)
+		assert.Equal(t, payload.Title, body.Data.Title)
+		assert.Equal(t, payload.Content, body.Data.Content)
+		assert.Equal(t, payload.Completed, body.Data.Completed)
 	})
 }
