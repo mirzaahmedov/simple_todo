@@ -2,7 +2,6 @@ package router
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,38 +11,32 @@ import (
 )
 
 func TestTodoHandlers(t *testing.T) {
-	router := NewTestHTTPRouter()
+	r := NewTestHTTPRouter()
 
 	t.Run("TodoCreateHandler", func(t *testing.T) {
-		payload := model.TodoCreateRequest{
+		data := model.TodoCreateRequest{
 			Title:     "todo title",
 			Content:   "todo content",
 			Completed: false,
 		}
-		r, err := NewTestRequest(http.MethodPost, "/todos", payload)
+		req, err := NewTestRequest(http.MethodPost, "/todos", data)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		r.Header.Add("Content-Type", "application/json")
+		req.Header.Add("Content-Type", "application/json")
 
-		w := httptest.NewRecorder()
+		rec := httptest.NewRecorder()
 
-		router.ServeHTTP(w, r)
+		r.ServeHTTP(rec, req)
 
-		body := struct {
-			Data model.Todo
-		}{}
-		bodyBytes, err := io.ReadAll(w.Result().Body)
-		t.Log("body", string(bodyBytes))
-		if err != nil {
-			t.Fatal(err)
-		}
-		json.Unmarshal(bodyBytes, &body)
+		res := &SuccessResponse[*model.Todo]{}
 
-		assert.Equal(t, http.StatusCreated, w.Result().StatusCode)
-		assert.Equal(t, payload.Title, body.Data.Title)
-		assert.Equal(t, payload.Content, body.Data.Content)
-		assert.Equal(t, payload.Completed, body.Data.Completed)
+		assert.Nil(t, json.NewDecoder(rec.Body).Decode(&res))
+		assert.Equal(t, http.StatusCreated, rec.Result().StatusCode)
+		assert.NotZero(t, res.Data.ID)
+		assert.Equal(t, data.Title, res.Data.Title)
+		assert.Equal(t, data.Content, res.Data.Content)
+		assert.Equal(t, data.Completed, res.Data.Completed)
 	})
 }

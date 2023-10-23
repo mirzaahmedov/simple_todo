@@ -1,7 +1,6 @@
 package router
 
 import (
-	"log"
 	"log/slog"
 	"net/http"
 
@@ -15,13 +14,9 @@ func (r *HTTPRouter) handleTodoCreate(c *gin.Context) {
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		r.logger.Debug("error binding request body", slog.String("error", err.Error()))
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		respondError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	log.Print("request logger is", r.logger)
 
 	todo, err := r.store.Todo().Create(&model.Todo{
 		Title:     req.Title,
@@ -30,15 +25,11 @@ func (r *HTTPRouter) handleTodoCreate(c *gin.Context) {
 	})
 	if err != nil {
 		r.logger.Debug("can not save todo in database", slog.String("error", err.Error()))
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		respondError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"data": todo,
-	})
+	respondJSON(c, http.StatusCreated, todo, nil)
 }
 func (r *HTTPRouter) handleTodoGetAll(c *gin.Context) {
 	todos, err := r.store.Todo().GetAll()

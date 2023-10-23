@@ -3,13 +3,15 @@ package mock
 import (
 	"time"
 
+	"github.com/mirzaahmedov/simple_todo/internal/generate"
 	"github.com/mirzaahmedov/simple_todo/internal/model"
 	"github.com/mirzaahmedov/simple_todo/internal/store"
 )
 
 type TodoRepository struct {
-	store *MockStore
-	todos []model.Todo
+	store    *MockStore
+	todos    []model.Todo
+	sequence int
 }
 
 func (s *MockStore) Todo() store.TodoRepository {
@@ -25,6 +27,7 @@ func (s *MockStore) Todo() store.TodoRepository {
 
 func (r *TodoRepository) Create(values *model.Todo) (*model.Todo, error) {
 	todo := model.Todo{
+		ID:         generate.UniqueID(),
 		Title:      values.Title,
 		Content:    values.Content,
 		Completed:  values.Completed,
@@ -39,14 +42,13 @@ func (r *TodoRepository) GetAll() ([]model.Todo, error) {
 	return r.todos, nil
 }
 func (r *TodoRepository) GetByID(id string) (*model.Todo, error) {
-
 	for _, t := range r.todos {
 		if t.ID == id {
 			return &t, nil
 		}
 	}
 
-	return nil, nil
+	return nil, store.ErrNotFound
 }
 func (r *TodoRepository) Update(id string, values *model.Todo) (*model.Todo, error) {
 	for _, t := range r.todos {
@@ -59,14 +61,15 @@ func (r *TodoRepository) Update(id string, values *model.Todo) (*model.Todo, err
 		}
 	}
 
-	return nil, nil
+	return nil, store.ErrNotFound
 }
 func (r *TodoRepository) Delete(id string) error {
 	for i, t := range r.todos {
 		if t.ID == id {
 			r.todos = append(r.todos[:i], r.todos[i+1:]...)
+			return nil
 		}
 	}
 
-	return nil
+	return store.ErrNotFound
 }
