@@ -10,7 +10,7 @@ import (
 	"github.com/mirzaahmedov/simple_todo/internal/store/mock"
 )
 
-func NewTestHTTPRouter() *HTTPRouter {
+func MakeTestHTTPRouter() *HTTPRouter {
 	slog.SetDefault(
 		slog.New(
 			slog.NewTextHandler(os.Stdin, &slog.HandlerOptions{
@@ -29,7 +29,7 @@ func NewTestHTTPRouter() *HTTPRouter {
 	return r
 }
 
-func NewTestRequest(method string, url string, body any) (*http.Request, error) {
+func MakeTestRequest(method string, url string, body any) (*http.Request, error) {
 	if body != nil {
 		bodyBytes, err := json.Marshal(body)
 		if err != nil {
@@ -39,4 +39,15 @@ func NewTestRequest(method string, url string, body any) (*http.Request, error) 
 		return http.NewRequest(method, url, bytes.NewReader(bodyBytes))
 	}
 	return http.NewRequest(method, url, nil)
+}
+
+func ParseJSON[T Model](buf *bytes.Buffer) (*SuccessResponse[T], error) {
+	data := SuccessResponse[T]{}
+
+	err := json.NewDecoder(buf).Decode(&data)
+	if err != nil {
+		return nil, err
+	}
+
+	return &data, nil
 }
