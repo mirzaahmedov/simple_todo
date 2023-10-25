@@ -1,0 +1,8 @@
+name: merge
+on: [merge]
+jobs:
+  test:
+    runs-on: alpine-latest
+    steps:
+      - name: Echo hello world
+        run: echo "hello world"
