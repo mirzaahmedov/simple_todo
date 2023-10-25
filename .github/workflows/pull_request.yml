@@ -1,5 +1,5 @@
-name: merge
-on: [pull-request]
+name: pull_request
+on: [pull_request]
 jobs:
   test:
     runs-on: alpine-latest
