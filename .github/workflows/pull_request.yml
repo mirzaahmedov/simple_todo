@@ -1,0 +1,8 @@
+name: pull_request
+on: [pull_request]
+jobs:
+  test:
+    runs-on: alpine-latest
+    steps:
+      - name: Echo hello world
+        run: echo "hello world"
