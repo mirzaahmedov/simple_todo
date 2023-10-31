@@ -45,7 +45,7 @@ func main() {
 
 	r := router.NewHTTPRouter(s, slog.Default())
 
-	r.Initialize()
+	r.Init()
 
 	err = r.Listen(cfg.BindingAddress)
 	if err != nil {

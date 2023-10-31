@@ -21,7 +21,7 @@ func NewHTTPRouter(store store.Store, logger *slog.Logger) *HTTPRouter {
 		logger: logger,
 	}
 }
-func (r *HTTPRouter) Initialize() {
+func (r *HTTPRouter) Init() {
 	r.router.POST("/todos", r.handleTodoCreate)
 	r.router.GET("/todos", r.handleTodoGetAll)
 	r.router.GET("/todos/:id", r.handleTodoGetByID)

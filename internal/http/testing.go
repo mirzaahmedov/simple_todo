@@ -24,7 +24,7 @@ func MakeTestHTTPRouter() *HTTPRouter {
 		slog.Default(),
 	)
 
-	r.Initialize()
+	r.Init()
 
 	return r
 }
