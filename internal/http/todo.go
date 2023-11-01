@@ -1,10 +1,11 @@
 package router
 
 import (
-	"log/slog"
-	"net/http"
+	"encoding/json"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/mirzaahmedov/simple_todo/internal/http/response"
 	"github.com/mirzaahmedov/simple_todo/internal/model"
 )
 
@@ -13,8 +14,22 @@ func (r *HTTPRouter) handleTodoCreate(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		r.logger.Debug("error binding request body", slog.String("error", err.Error()))
-		respondError(c, http.StatusBadRequest, err.Error())
+		if e, ok := err.(*json.UnmarshalTypeError); ok {
+			response.Error(c, 400, gin.H{
+				"message": e.Field + " must be a " + e.Type.Name(),
+			})
+			return
+		}
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	err = validation.ValidateStruct(&req,
+		validation.Field(&req.Title, validation.Required, validation.Length(2, 50)),
+		validation.Field(&req.Content, validation.Required, validation.Length(2, 50)),
+	)
+	if err != nil {
+		response.Error(c, 400, err.Error())
 		return
 	}
 
@@ -24,40 +39,31 @@ func (r *HTTPRouter) handleTodoCreate(c *gin.Context) {
 		Completed: req.Completed,
 	})
 	if err != nil {
-		r.logger.Debug("can not save todo in database", slog.String("error", err.Error()))
-		respondError(c, http.StatusInternalServerError, err.Error())
+		response.Error(c, 500, err.Error())
 		return
 	}
 
-	respondJSON(c, http.StatusCreated, todo, nil)
+	response.JSON(c, 201, todo, nil)
 }
 func (r *HTTPRouter) handleTodoGetAll(c *gin.Context) {
 	todos, err := r.store.Todo().GetAll()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		response.Error(c, 500, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data": todos,
-	})
+	response.JSON(c, 200, todos, nil)
 }
 func (r *HTTPRouter) handleTodoGetByID(c *gin.Context) {
 	id := c.Param("id")
 
 	todo, err := r.store.Todo().GetByID(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		response.Error(c, 500, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data": todo,
-	})
+	response.JSON(c, 200, todo, nil)
 }
 func (r *HTTPRouter) handleTodoUpdate(c *gin.Context) {
 	id := c.Param("id")
@@ -65,10 +71,22 @@ func (r *HTTPRouter) handleTodoUpdate(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		r.logger.Debug("can not bind request body", slog.String("error", err.Error()))
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		if e, ok := err.(*json.UnmarshalTypeError); !ok {
+			response.Error(c, 400, gin.H{
+				"message": e.Field + " " + e.Type.Name(),
+			})
+			return
+		}
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	err = validation.ValidateStruct(&req,
+		validation.Field(&req.Title, validation.Required, validation.Length(2, 50)),
+		validation.Field(&req.Content, validation.Required, validation.Length(2, 50)),
+	)
+	if err != nil {
+		response.Error(c, 400, err.Error())
 		return
 	}
 
@@ -78,30 +96,20 @@ func (r *HTTPRouter) handleTodoUpdate(c *gin.Context) {
 		Completed: req.Completed,
 	})
 	if err != nil {
-		r.logger.Debug("can not save todo in the database", slog.String("error", err.Error()))
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		response.Error(c, 500, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data": todo,
-	})
+	response.JSON(c, 200, todo, nil)
 }
 func (r *HTTPRouter) handleTodoDelete(c *gin.Context) {
 	id := c.Param("id")
 
 	err := r.store.Todo().Delete(id)
 	if err != nil {
-		r.logger.Debug("can not delete todo from todos", slog.String("error", err.Error()))
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		response.Error(c, 500, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"ok": true,
-	})
+	response.JSON(c, 200, true, nil)
 }

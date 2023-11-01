@@ -40,14 +40,3 @@ func MakeTestRequest(method string, url string, body any) (*http.Request, error)
 	}
 	return http.NewRequest(method, url, nil)
 }
-
-func ParseJSON[T Model](buf *bytes.Buffer) (*SuccessResponse[T], error) {
-	data := SuccessResponse[T]{}
-
-	err := json.NewDecoder(buf).Decode(&data)
-	if err != nil {
-		return nil, err
-	}
-
-	return &data, nil
-}
