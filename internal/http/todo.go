@@ -16,7 +16,7 @@ func (r *HTTPRouter) handleTodoCreate(c *gin.Context) {
 	if err != nil {
 		if e, ok := err.(*json.UnmarshalTypeError); ok {
 			response.Error(c, 400, gin.H{
-				"message": e.Field + " must be a " + e.Type.Name(),
+				"message": e.Field + " expected to be a " + e.Type.Name(),
 			})
 			return
 		}
